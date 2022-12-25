@@ -1,0 +1,13 @@
+site_name: Descant
+site_description: A GDPR-compliant comment management system
+site_author: Keith Gaughan
+
+repo_url: https://github.com/kgaughan/descant/
+edit_uri: blob/main/docs/
+
+nav:
+  - Home: index.md
+  - design.md
+
+markdown_extensions:
+  - abbr
