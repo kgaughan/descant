@@ -8,6 +8,10 @@ edit_uri: blob/main/docs/
 nav:
   - Home: index.md
   - design.md
+  - development.md
+
+theme:
+  name: readthedocs
 
 markdown_extensions:
   - abbr

@@ -74,7 +74,7 @@ This is where the meat of the system lives. _comment_id_ is for identifying a gi
 
 _identity_id_ ties a comment to a temporary authorisation. Once the identity is confirmed, the associated comments get processed.
 
-The _thread_ is an identifier constructed by the site from the _site_id_ and site's own thread identifier (such as a stub, URL, post ID, &c.). In transit, only a version of this encrypted using _sites.secret_key_ is used, but here it's stored in its raw form. Initially, this will take the form `SHA256(site_id || '|' || site_thread_id)`. This isn't considered sensitive information and is mainly to maintain the external key at a fixed size.
+The _thread_ is an identifier constructed by the site from the _site_id_ and site's own thread identifier (such as a stub, URL, post ID, &c.). In transit, this is signed using _sites.secret_key_, but here it's stored in its raw form. Initially, this will take the form `SHA256(site_id || '|' || site_thread_id)`. This isn't considered sensitive information and is mainly to maintain the external key at a fixed size.
 
 When a comment is first submitted, the _submitted_ timestamp is set, along with at least _name_ and _comment_. _submitted_ is primarily for the site owner's convenience. When the associated identity is confirmed, _published_ is set to `NOW() + INTERVAL x MINUTES`, where _x_ is a cooldown period in which the commenter can edit the comment. Once the cooldown period expires, the comment is considered public and cannot be edited.
 
@@ -82,7 +82,7 @@ If the commenter has opted into email notifications, their encrypted email addre
 
 ### Design principals
 
-Generally, UUIDs are used for public IDs to avoid creating guessable identifiers. The comment ID is the one exception for this as it must always be used with the _thread_ identfier, and this is always encrypted in transit.
+Generally, UUIDs are used for public IDs to avoid creating guessable identifiers. The comment ID is the one exception for this as it must always be used with the _thread_ identfier, and this is always signed in transit.
 
 Rather than using booleans as flags, we use nullable timestamps. If set, this is the equivalent of _true_, and lets us know when the event happened.
 
@@ -92,6 +92,12 @@ Rather than using booleans as flags, we use nullable timestamps. If set, this is
 * Would it be better to use the site's _secret_key_ rather than the master key for encrypting the emails? It's a good argument to be made either way, but this may be more secure as it would leak less information in case of a database compromise.
 * Encrypted and hashed fields should contain some information on how they're encrypted/hashed. The space dedicated to the encrypted fields in almost certainly too small, and I'll need to make some decisions based off of what I see before I come up with the final sizing.
 
+## Likely implementation
+
+The identity is likely going to be a [JWT]. We need to guarantee that its contents cannot be tampered with, but the contents of the token can be disclosed safely to the commenter, so long as TLS is used to avoid MITM attacks.
+
 [htmx]: https://htmx.org/
+[JWT]: https://www.rfc-editor.org/rfc/rfc7519 "JSON Web Token"
 
 *[PII]: Personally Identifiable Information
+*[MITM]: Man-in-the-Middle
