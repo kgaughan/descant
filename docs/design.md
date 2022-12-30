@@ -16,14 +16,14 @@ The are three tables: _sites_, _identities_, and _comments_.
 ```sql
 CREATE TABLE sites (
     site_id    CHAR(36)     NOT NULL,
-    secret_key CHAR(64)     NULL,
+    secret_key CHAR(81)     NOT NULL,
     site       VARCHAR(256),
 
     PRIMARY KEY (site_id)
 );
 ```
 
-The _sites_ table stores basic metadata about a given comment site. The _site_id_ is a public UUID that identifies the site in question, while _secret_key_ is a shared secret used for signing the _thread ID_. The _site_ is the public name for the site in question. _secret_key_ is not stored in plaintext, but is entryped by a master key that's stored in the environment.
+The _sites_ table stores basic metadata about a given comment site. The _site_id_ is a public UUID that identifies the site in question, while _secret_key_ is a shared secret used for signing the _thread ID_. The _site_ is the public name for the site in question. _secret_key_ is not stored in plaintext, but is encrypted by a master key that's stored in the environment.
 
 ### Identities
 

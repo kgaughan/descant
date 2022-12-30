@@ -8,8 +8,14 @@ from sqlalchemy import (
     String,
     Table,
     Text,
-    create_engine,
 )
+
+__all__ = [
+    "sites",
+    "identities",
+    "comments",
+    "metadata",
+]
 
 metadata = MetaData()
 
@@ -17,7 +23,7 @@ sites = Table(
     "sites",
     metadata,
     Column("site_id", CHAR(36), primary_key=True),
-    Column("secret_key", CHAR(64), nullable=False),
+    Column("secret_key", CHAR(81), nullable=False),
     Column("site", String(255)),
 )
 
@@ -50,7 +56,3 @@ comments = Table(
     Column("email", String(255)),
     Column("comment", Text(), nullable=False),
 )
-
-
-def create_tables():
-    metadata.create_all(create_engine("sqlite:///example.db", echo=True))
