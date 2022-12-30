@@ -23,6 +23,11 @@ tidy = [
   "black src tests",
   "isort --fss --profile black src tests",
 ]
+check = [
+  "flake8 src tests",
+  "black --check --diff src tests",
+  "isort --check-only --diff --fss --profile black src tests",
+]
 no-cov = "cov --no-cov {args}"
 serve = "python -m descant.web"
 
