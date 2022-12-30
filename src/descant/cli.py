@@ -1,6 +1,7 @@
 import base64
 import os
 import uuid
+import configparser
 
 import click
 import sqlalchemy
@@ -11,8 +12,19 @@ CONNECTION_STRING = "sqlite:///example.db"
 
 
 @click.group()
-def main():
-    pass
+@click.option(
+    "--config",
+    default="~/.descant.ini",
+    type=click.Path(),
+    envvar="DESCANT_CONFIG",
+)
+@click.pass_context
+def main(ctx, config):
+    if os.path.exists(config):
+        parser = configparser.ConfigParser()
+        with open(config, "r") as fh:
+            parser.read_file(fh)
+        ctx.default_map = dict(parser.items())
 
 
 @main.command("create-db")
