@@ -29,7 +29,6 @@ check = [
   "isort --check-only --diff --fss --profile black src tests",
 ]
 no-cov = "cov --no-cov {args}"
-serve = "python -m descant.web"
 
 [[envs.test.matrix]]
 python = ["37", "38", "39", "310", "311"]
