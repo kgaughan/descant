@@ -1,12 +1,10 @@
 import asyncio
-import base64
 import configparser
 import os
 import uuid
 
 from aiohttp import web
 import click
-import sqlalchemy
 
 from . import crypto, schema, site
 

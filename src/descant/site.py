@@ -7,7 +7,7 @@ import cryptography
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from . import schema
+from . import crypto, schema
 
 routes = web.RouteTableDef()
 
@@ -43,13 +43,18 @@ async def submit_comment(request: web.Request) -> web.StreamResponse:
             status=http.HTTPStatus.BAD_REQUEST,
         )
 
-    # We've gotten far enough that we can now check the thread
-    thread = form.get("thread")
+    # We've gotten far enough that we can now check the thread.
+    thread = crypto.decode_thread_token(form.get("thread"), secret_key)
+    if thread is None:
+        return web.Response(
+            text="Invalid or missing thread token",
+            status=http.HTTPStatus.BAD_REQUEST,
+        )
 
     name = form.get("name")
-    url = form.get("url")
-    email = form.get("email")
-    comment = form.get("coment")
+    # url = form.get("url")
+    # email = form.get("email")
+    # comment = form.get("coment")
     return web.Response(text=f"name={name} site_id={site_id} thread={thread}")
 
 

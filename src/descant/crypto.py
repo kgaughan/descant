@@ -1,8 +1,9 @@
 import base64
-import os
 import sys
+from typing import Optional
 
 from cryptography.hazmat.primitives.ciphers import aead
+import jwt
 
 __all__ = [
     "CIPHERS",
@@ -43,3 +44,21 @@ def b64decode(v):
 
 def b64encode(v):
     return base64.b64encode(v).decode("ascii")
+
+
+def decode_thread_token(
+    thread_token: Optional[str],
+    secret_key: bytes,
+) -> Optional[str]:
+    if thread_token is None:
+        return None
+    try:
+        claims = jwt.decode(
+            thread_token.encode("ascii"),
+            secret_key,
+            algorithms=["HS256", "HS384", "HS512"],
+            options=dict(verify_signature=True),
+        )
+    except jwt.DecodeError:
+        return None
+    return claims.get("thread")

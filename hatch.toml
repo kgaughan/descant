@@ -24,7 +24,7 @@ tidy = [
   "isort --fss --profile black src tests",
 ]
 check = [
-  "flake8 src tests",
+  "flake8 --max-line-length=88 src tests",
   "black --check --diff src tests",
   "isort --check-only --diff --fss --profile black src tests",
 ]
