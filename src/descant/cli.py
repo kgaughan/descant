@@ -70,12 +70,33 @@ def add_site(db, master_key, site):
 
 @main.command("serve")
 @click.option("--db", required=True, hidden=True)
-@click.option("--master-key", required=True, type=click.File("r", "ascii"), hidden=True)
-def serve(db, master_key):
+@click.option(
+    "--ttl",
+    default=600,
+    type=click.INT,
+    hidden=True,
+    help="Seconds before the identity claim must be refreshed.",
+)
+@click.option(
+    "--max-ttl",
+    default=604800,
+    type=click.INT,
+    hidden=True,
+    help="Seconds before the identity claim expires if not refreshed.",
+)
+@click.option(
+    "--master-key",
+    default="master.key",
+    type=click.File("r", "ascii"),
+    hidden=True,
+)
+def serve(db, ttl, max_ttl, master_key):
     web.run_app(
         site.init_func(
             [],
             db=db,
+            ttl=ttl,
+            max_ttl=max_ttl,
             master_cipher=crypto.parse_key(master_key.read()),
         ),
         host="localhost",
