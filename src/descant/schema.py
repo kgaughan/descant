@@ -29,7 +29,8 @@ sites = Table(
     "sites",
     metadata,
     Column("site_id", CHAR(36), primary_key=True),
-    Column("secret_key", CHAR(81), nullable=False),
+    Column("secret_key", CHAR(64), nullable=False),
+    Column("nonce", CHAR(16), nullable=False),
     Column("site", String(255)),
 )
 
@@ -80,12 +81,13 @@ async def execute(db, clause):
 
 
 def query_secret_key(site_id: str) -> Select:
-    return select(sites.c.secret_key).where(sites.c.site_id == site_id)
+    return select(sites.c.nonce, sites.c.secret_key).where(sites.c.site_id == site_id)
 
 
 def insert_site(site_id: str, nonce: bytes, encrypted: bytes, name: str) -> Insert:
     return sites.insert().values(
         site_id=site_id,
-        secret_key=".".join([crypto.b64encode(nonce), crypto.b64encode(encrypted)]),
+        nonce=crypto.b64encode(nonce),
+        secret_key=crypto.b64encode(encrypted),
         site=name,
     )

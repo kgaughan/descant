@@ -4,6 +4,7 @@ from typing import List
 
 from aiohttp import web
 import cryptography
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from . import schema
@@ -21,13 +22,13 @@ async def submit_comment(request: web.Request) -> web.StreamResponse:
 
     async with request.app["db"].connect() as conn:
         result = await conn.execute(schema.query_secret_key(site_id))
-        full_secret_key = result.scalar()
-    if full_secret_key is None:
-        return web.Response(
-            text=f"Bad site ID: {site_id}",
-            status=http.HTTPStatus.BAD_REQUEST,
-        )
-    nonce, encrypted_key = full_secret_key.split(".", 1)
+        try:
+            nonce, encrypted_key = result.one()
+        except NoResultFound:
+            return web.Response(
+                text=f"Bad site ID: {site_id}",
+                status=http.HTTPStatus.BAD_REQUEST,
+            )
     try:
         secret_key = request.app["master_cipher"].decrypt(
             base64.b64decode(nonce.encode("ascii")),

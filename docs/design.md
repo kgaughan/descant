@@ -16,7 +16,8 @@ The are three tables: _sites_, _identities_, and _comments_.
 ```sql
 CREATE TABLE sites (
     site_id    CHAR(36)     NOT NULL,
-    secret_key CHAR(81)     NOT NULL,
+    nonce      CHAR(16)     NOT NULL,
+    secret_key CHAR(64)     NOT NULL,
     site       VARCHAR(256),
 
     PRIMARY KEY (site_id)
