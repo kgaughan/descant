@@ -1,6 +1,9 @@
 import base64
+import datetime
 import http
-from typing import List
+import os
+import typing as t
+import uuid
 
 from aiohttp import web
 import cryptography
@@ -58,7 +61,7 @@ async def submit_comment(request: web.Request) -> web.StreamResponse:
     return web.Response(text=f"name={name} site_id={site_id} thread={thread}")
 
 
-def init_func(argv: List[str], **cfg) -> web.Application:
+def init_func(argv: t.List[str], **cfg) -> web.Application:
     async def db_engine(app: web.Application):
         engine = create_async_engine(cfg["db"], echo=True)
         app["db"] = engine

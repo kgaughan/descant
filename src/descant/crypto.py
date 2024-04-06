@@ -1,6 +1,6 @@
 import base64
 import sys
-from typing import Optional
+import typing as t
 
 from cryptography.hazmat.primitives.ciphers import aead
 import jwt
@@ -26,7 +26,7 @@ CIPHERS = {
 }
 
 
-def parse_key(raw_key: str):
+def parse_key(raw_key: str) -> bytes:
     cipher, b64_key = raw_key.split(":", 1)
     if cipher not in CIPHERS:
         sys.exit(f"Bad cipher: {cipher}")
@@ -38,18 +38,18 @@ def generate_key(cipher: str) -> str:
     return f"{cipher}:{base64.b64encode(key).decode('ascii')}"
 
 
-def b64decode(v):
+def b64decode(v: t.Union[str, bytes]) -> str:
     return base64.b64decode(v).decode("ascii")
 
 
-def b64encode(v):
+def b64encode(v: bytes) -> str:
     return base64.b64encode(v).decode("ascii")
 
 
 def decode_thread_token(
-    thread_token: Optional[str],
+    thread_token: t.Optional[str],
     secret_key: bytes,
-) -> Optional[str]:
+) -> t.Optional[str]:
     if thread_token is None:
         return None
     try:
