@@ -54,6 +54,22 @@ async def submit_comment(request: web.Request) -> web.StreamResponse:
             status=http.HTTPStatus.BAD_REQUEST,
         )
 
+    identity_token = request.cookies.get("descant")
+    if identity_token is None:
+        identity_id = str(uuid.uuid4())
+        confirmation_secret = crypto.b64encode(os.urandom(48))
+        now = datetime.datetime.now(datetime.timezone.utc)
+        async with request.app["db"].connect() as conn:
+            await conn.execute(
+                schema.insert_identity(
+                    identity_id=identity_id,
+                    confirmation_secret=confirmation_secret,
+                    site_id=site_id,
+                    ttl=now + datetime.timedelta(seconds=request.app["ttl"]),
+                    max_ttl=now + datetime.timedelta(seconds=request.app["max_ttl"]),
+                )
+            )
+
     name = form.get("name")
     # url = form.get("url")
     # email = form.get("email")

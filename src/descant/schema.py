@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import (
     CHAR,
     Column,
@@ -90,4 +92,20 @@ def insert_site(site_id: str, nonce: bytes, encrypted: bytes, name: str) -> Inse
         nonce=crypto.b64encode(nonce),
         secret_key=crypto.b64encode(encrypted),
         site=name,
+    )
+
+
+def insert_identity(
+    identity_id: str,
+    confirmation_secret: str,
+    site_id: str,
+    ttl: datetime.datetime,
+    max_ttl: datetime.datetime,
+) -> str:
+    return identities.insert().values(
+        identity_id=identity_id,
+        confirmation_secret=confirmation_secret,
+        site_id=site_id,
+        ttl=ttl,
+        max_ttl=max_ttl,
     )
