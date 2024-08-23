@@ -9,6 +9,7 @@ nav:
   - Home: index.md
   - design.md
   - development.md
+  - todo.md
 
 theme:
   name: readthedocs

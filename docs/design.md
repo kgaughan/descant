@@ -102,3 +102,9 @@ The identity is likely going to be a [JWT]. We need to guarantee that its conten
 
 *[PII]: Personally Identifiable Information
 *[MITM]: Man-in-the-Middle
+
+## Protocol
+
+The site is first registered with Descant, yielding a site ID and secret key. The secret key is base64-encoded. This is used by 
+
+It's up to the client to decide how to construct its thread identifier, but the identifier should be run through a SHA-256 hash, as it may be a maximum of 64-bytes long.
