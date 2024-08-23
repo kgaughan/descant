@@ -35,3 +35,4 @@ tests/results.xml
 *.orig
 *.bak
 master.key
+_version.py
