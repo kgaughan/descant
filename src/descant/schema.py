@@ -101,7 +101,7 @@ def insert_identity(
     site_id: str,
     ttl: datetime.datetime,
     max_ttl: datetime.datetime,
-) -> str:
+) -> Insert:
     return identities.insert().values(
         identity_id=identity_id,
         confirmation_secret=confirmation_secret,

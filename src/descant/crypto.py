@@ -1,3 +1,4 @@
+import abc
 import base64
 import sys
 import typing as t
@@ -13,29 +14,58 @@ __all__ = [
     "b64encode",
 ]
 
+
+class CipherInstance(t.Protocol):
+    def encrypt(self, nonce: bytes, data: bytes, associated_data: bytes) -> bytes: ...
+    def decrypt(self, nonce: bytes, data: bytes, associated_data: bytes) -> bytes: ...
+
+
+class Cipher(t.Protocol):
+    @staticmethod
+    @abc.abstractmethod
+    def make(key: bytes) -> CipherInstance: ...
+
+    @staticmethod
+    @abc.abstractmethod
+    def generate_key() -> bytes: ...
+
+
+class ChaCha20(Cipher):
+    @staticmethod
+    def make(key: bytes) -> CipherInstance:
+        return aead.ChaCha20Poly1305(key)
+
+    @staticmethod
+    def generate_key() -> bytes:
+        return aead.ChaCha20Poly1305.generate_key()
+
+
+class AESGCM(Cipher):
+    @staticmethod
+    def make(key: bytes) -> CipherInstance:
+        return aead.AESGCM(key)
+
+    @staticmethod
+    def generate_key() -> bytes:
+        return aead.AESGCM.generate_key(256)
+
+
 # Supported ciphers
-CIPHERS = {
-    "ChaCha20": {
-        "cls": aead.ChaCha20Poly1305,
-        "generate_key": aead.ChaCha20Poly1305.generate_key,
-    },
-    "AESGCM": {
-        "cls": aead.AESGCM,
-        "generate_key": lambda: aead.AESGCM.generate_key(256),
-    },
+CIPHERS: t.Mapping[str, Cipher] = {
+    "ChaCha20": ChaCha20,
+    "AESGCM": AESGCM,
 }
 
 
-def parse_key(raw_key: str) -> bytes:
+def parse_key(raw_key: str) -> CipherInstance:
     cipher, b64_key = raw_key.split(":", 1)
     if cipher not in CIPHERS:
         sys.exit(f"Bad cipher: {cipher}")
-    return CIPHERS[cipher]["cls"](base64.b64decode(b64_key))
+    return CIPHERS[cipher].make(base64.b64decode(b64_key))
 
 
 def generate_key(cipher: str) -> str:
-    key = CIPHERS[cipher]["generate_key"]()
-    return f"{cipher}:{base64.b64encode(key).decode('ascii')}"
+    return f"{cipher}:{base64.b64encode(CIPHERS[cipher].generate_key()).decode('ascii')}"
 
 
 def b64decode(v: t.Union[str, bytes]) -> str:
@@ -48,16 +78,16 @@ def b64encode(v: bytes) -> str:
 
 def decode_thread_token(
     thread_token: t.Optional[str],
-    secret_key: bytes,
+    secret_key: str,
 ) -> t.Optional[str]:
     if thread_token is None:
         return None
     try:
         claims = jwt.decode(
-            thread_token.encode("ascii"),
+            thread_token,
             secret_key,
             algorithms=["HS256", "HS384", "HS512"],
-            options=dict(verify_signature=True),
+            options={"verify_signature": True},
         )
     except jwt.DecodeError:
         return None

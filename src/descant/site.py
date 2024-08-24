@@ -6,7 +6,7 @@ import typing as t
 import uuid
 
 from aiohttp import web
-import cryptography
+import cryptography.exceptions as cex
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -36,9 +36,9 @@ async def submit_comment(request: web.Request) -> web.StreamResponse:
         secret_key = request.app["master_cipher"].decrypt(
             base64.b64decode(nonce.encode("ascii")),
             base64.b64decode(encrypted_key.encode("ascii")),
-            site_id.encode("ascii"),
+            site_id,
         )
-    except cryptography.exceptions.InvalidTag:
+    except cex.InvalidTag:
         # This should never happen unless there's a database corruption issue
         # or the master key was overwritten.
         return web.Response(
@@ -77,7 +77,7 @@ async def submit_comment(request: web.Request) -> web.StreamResponse:
     return web.Response(text=f"name={name} site_id={site_id} thread={thread}")
 
 
-def init_func(argv: t.List[str], **cfg) -> web.Application:
+def init_func(**cfg: t.Any) -> web.Application:
     async def db_engine(app: web.Application):
         engine = create_async_engine(cfg["db"], echo=True)
         app["db"] = engine
@@ -85,7 +85,7 @@ def init_func(argv: t.List[str], **cfg) -> web.Application:
         await engine.dispose()
 
     app = web.Application()
-    app.update(cfg)
+    app.update(cfg.items())
     app.add_routes(routes)
     app.cleanup_ctx.append(db_engine)
     return app

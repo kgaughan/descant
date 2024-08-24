@@ -22,13 +22,9 @@ def main(ctx, config):
         parser = configparser.ConfigParser()
         for section in main.commands:
             parser.add_section(section)
-        with open(config, "r") as fh:
+        with open(config) as fh:
             parser.read_file(fh)
-        ctx.default_map = {
-            key: dict(sect)
-            for key, sect in parser.items()
-            if key != configparser.DEFAULTSECT
-        }
+        ctx.default_map = {key: dict(sect) for key, sect in parser.items() if key != configparser.DEFAULTSECT}
 
 
 @main.command("create-db")
@@ -93,7 +89,6 @@ def add_site(db, master_key, site):
 def serve(db, ttl, max_ttl, master_key):
     web.run_app(
         site.init_func(
-            [],
             db=db,
             ttl=ttl,
             max_ttl=max_ttl,
