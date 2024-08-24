@@ -8,19 +8,17 @@ __pycache__/
 # Distribution/packaging
 dist/
 
-# Coverage
+# Unit test / coverage reports
 .coverage
 htmlcov/
 tests/results.xml
-
-# Caches
 .*_cache/
 
-# Editors
+# General detritus
 *~
 .*.sw?
-
-# Logs
+*.orig
+*.bak
 *.log
 
 # Databases
@@ -32,7 +30,5 @@ tests/results.xml
 /site/
 
 # Other
-*.orig
-*.bak
 master.key
 _version.py
