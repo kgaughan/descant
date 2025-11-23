@@ -47,7 +47,7 @@ def generate_master_key(cipher, master_key):
 
 
 @main.command("add-site")
-@click.option("--db", required=True, hidden=True)
+@click.option("--db", required=True)
 @click.option("--master-key", default="master.key", type=click.File("r", "ascii"))
 @click.argument("site", required=True)
 def add_site(db, master_key, site):
