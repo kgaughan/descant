@@ -17,12 +17,12 @@ from sqlalchemy.sql.expression import Insert, Select, select
 from . import crypto
 
 __all__ = [
-    "sites",
-    "identities",
     "comments",
     "create_db",
     "execute",
+    "identities",
     "query_secret_key",
+    "sites",
 ]
 
 metadata = MetaData()

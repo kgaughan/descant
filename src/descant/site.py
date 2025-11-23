@@ -58,7 +58,7 @@ async def submit_comment(request: web.Request) -> web.StreamResponse:
     if identity_token is None:
         identity_id = str(uuid.uuid4())
         confirmation_secret = crypto.b64encode(os.urandom(48))
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.now(datetime.UTC)
         async with request.app["db"].connect() as conn:
             await conn.execute(
                 schema.insert_identity(

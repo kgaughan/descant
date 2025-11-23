@@ -8,10 +8,10 @@ import jwt
 
 __all__ = [
     "CIPHERS",
-    "generate_key",
-    "parse_key",
     "b64decode",
     "b64encode",
+    "generate_key",
+    "parse_key",
 ]
 
 
@@ -68,7 +68,7 @@ def generate_key(cipher: str) -> str:
     return f"{cipher}:{base64.b64encode(CIPHERS[cipher].generate_key()).decode('ascii')}"
 
 
-def b64decode(v: t.Union[str, bytes]) -> str:
+def b64decode(v: str | bytes) -> str:
     return base64.b64decode(v).decode("ascii")
 
 
@@ -77,9 +77,9 @@ def b64encode(v: bytes) -> str:
 
 
 def decode_thread_token(
-    thread_token: t.Optional[str],
+    thread_token: str | None,
     secret_key: str,
-) -> t.Optional[str]:
+) -> str | None:
     if thread_token is None:
         return None
     try:
