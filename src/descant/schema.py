@@ -67,14 +67,22 @@ comments = Table(
 )
 
 
-async def create_db(db):
+async def create_db(db: str) -> None:
+    """Create the database.
+
+    This is only intended to be invoked from the CLI.
+    """
     engine = create_async_engine(db)
     async with engine.begin() as conn:
         await conn.run_sync(metadata.create_all)
     await engine.dispose()
 
 
-async def execute(db, clause):
+async def execute(db: str, clause) -> None:
+    """Execute a statement.
+
+    This is only intended for simple configuration queries run from the CLI.
+    """
     engine = create_async_engine(db)
     async with engine.begin() as conn:
         await conn.execute(clause)
@@ -83,10 +91,33 @@ async def execute(db, clause):
 
 
 def query_secret_key(site_id: str) -> Select:
+    """Generate a query for the decryption nonce and secret key for a given site.
+
+    Args:
+        site_id: The site to request the master key nonce and secret key for.
+
+    Returns:
+        A SELECT query to fetch the information in question.
+
+    Note:
+        The nonce is question is the nonce used with the master key to encrypt
+        the secret key.
+    """
     return select(sites.c.nonce, sites.c.secret_key).where(sites.c.site_id == site_id)
 
 
 def insert_site(site_id: str, nonce: bytes, encrypted: bytes, name: str) -> Insert:
+    """Generate an INSERT statement to save a site.
+
+    Args:
+        site_id: ID to be used for subsequent lookups.
+        nonce: The nonce used for encrypting the secret key with the master key.
+        encrypted: The encrypted site key.
+        name: Human-readable name for the site.
+
+    Returns:
+        An INSERT statement.
+    """
     return sites.insert().values(
         site_id=site_id,
         nonce=crypto.b64encode(nonce),
@@ -102,6 +133,18 @@ def insert_identity(
     ttl: datetime.datetime,
     max_ttl: datetime.datetime,
 ) -> Insert:
+    """Generate an INSERT statement to add an identity.
+
+    Args:
+        identity_id: ID to use for subsequent lookups.
+        confirmation_secret: A secret value shared with the user to allow confirmation.
+        site_id: The site the identity is associated with.
+        ttl: Time until the identity expires; may be renewed, but cannot exceed `max_ttl`.
+        max_ttl: Maximum time until the identity expires.
+
+    Returns:
+        The INSERT statement.
+    """
     return identities.insert().values(
         identity_id=identity_id,
         confirmation_secret=confirmation_secret,

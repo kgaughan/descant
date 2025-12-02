@@ -16,11 +16,15 @@ __all__ = [
 
 
 class CipherInstance(t.Protocol):
+    """The interface cipher instances must implement."""
+
     def encrypt(self, nonce: bytes, data: bytes, associated_data: bytes) -> bytes: ...
     def decrypt(self, nonce: bytes, data: bytes, associated_data: bytes) -> bytes: ...
 
 
 class Cipher(t.Protocol):
+    """The interface allowing for cipher instances to be created."""
+
     @staticmethod
     @abc.abstractmethod
     def make(key: bytes) -> CipherInstance: ...
@@ -65,6 +69,14 @@ def parse_key(raw_key: str) -> CipherInstance:
 
 
 def generate_key(cipher: str) -> str:
+    """Generate a new key using the given cipher.
+
+    Args:
+        cipher: The cipher name.
+
+    Returns:
+        An encoded cipher key.
+    """
     return f"{cipher}:{base64.b64encode(CIPHERS[cipher].generate_key()).decode('ascii')}"
 
 

@@ -31,3 +31,6 @@ tests/results.xml
 
 # Other
 _version.py
+
+# You don't want this checked in!
+master.key
