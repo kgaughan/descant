@@ -16,3 +16,4 @@ theme:
 
 markdown_extensions:
   - abbr
+  - admonition

@@ -53,3 +53,39 @@ $ uv run descant --config descant.ini serve
 
 [uv]: https://docs.astral.sh/uv/
 [just]: https://just.systems/
+
+## Configuring PostgreSQL
+
+!!! note
+
+    You'll need to have run `uv sync --group postgres` to make sure the
+    drivers are installed as expected.
+
+Assuming you already have a superuser you can use for doing things like
+database and user creation, do:
+
+```console
+$ createuser --login --pwprompt descant
+...
+$ createdb descant
+```
+
+```console
+$ psql descant
+descant=# GRANT CREATE, CONNECT ON DATABASE descant TO descant;
+GRANT
+descant=# GRANT USAGE, CREATE ON SCHEMA public TO descant;
+GRANT
+descant=# GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO descant;
+GRANT
+```
+
+If you configure `descant.ini` with:
+
+```ini
+db = postgresql+asyncpg://descant:<redacted>@localhost:5432/descant
+```
+
+Replacing the password you used for `<redacted>` in the example above, you
+should now now be able to use the `create-db` subcommand to populate the
+database with an appropriate schema.
