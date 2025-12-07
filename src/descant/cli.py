@@ -1,7 +1,6 @@
 import asyncio
 import configparser
 import os
-import uuid
 
 from aiohttp import web
 import click
@@ -9,7 +8,7 @@ import click
 from . import crypto, schema, site
 
 
-@click.group()
+@click.group(help="A secure comments system.")
 @click.option(
     "--config",
     default="~/.descant.ini",
@@ -27,13 +26,13 @@ def main(ctx, config):
         ctx.default_map = {key: dict(sect) for key, sect in parser.items() if key != configparser.DEFAULTSECT}
 
 
-@main.command("create-db")
+@main.command("create-db", help="Configure the database")
 @click.option("--db", required=True, hidden=True)
 def create_db(db):
     asyncio.run(schema.create_db(db))
 
 
-@main.command("generate-master-key")
+@main.command("generate-master-key", help="Generate the master key")
 @click.option(
     "--cipher",
     default="AESGCM",
@@ -46,25 +45,19 @@ def generate_master_key(cipher, master_key):
     master_key.write(crypto.generate_key(cipher))
 
 
-@main.command("add-site")
+@main.command("add-site", help="Register a site")
 @click.option("--db", required=True)
 @click.option("--master-key", default="master.key", type=click.File("r", "ascii"))
 @click.argument("site", required=True)
 def add_site(db, master_key, site):
-    site_id = str(uuid.uuid4())
-    secret_key = os.urandom(32)  # 256-bits
-
     master_cipher = crypto.parse_key(master_key.read())
-    nonce = os.urandom(12)
-    encrypted = master_cipher.encrypt(nonce, secret_key, site_id.encode("ascii"))
-
-    asyncio.run(schema.execute(db, schema.insert_site(site_id, nonce, encrypted, site)))
-
+    site_id, nonce, site_key = crypto.generate_site(master_cipher)
+    asyncio.run(schema.execute(db, schema.insert_site(site_id, nonce, site_key, site)))
     print("Site ID:", site_id)
-    print("Secret key:", crypto.b64encode(secret_key))
+    print("Encrypted site key:", crypto.b64encode(site_key))
 
 
-@main.command("serve")
+@main.command("serve", help="Run the service using the development server")
 @click.option("--db", required=True, hidden=True)
 @click.option(
     "--ttl",

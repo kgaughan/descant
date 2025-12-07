@@ -3,6 +3,12 @@
 It's recommended you install [uv] and [just] to manage your development
 environment.
 
+!!! note
+
+    The following assumes you've made sure to install the `sqlite` group
+    with `uv sync --group sqlite`. If you've configured your development
+    environment with `just devel`, this should be the case.
+
 Create a file called `descant.ini`: this will store various settings, including
 the locations of your master key and the database connection string:
 

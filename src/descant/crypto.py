@@ -1,7 +1,9 @@
 import abc
 import base64
+import os
 import sys
 import typing as t
+import uuid
 
 from cryptography.hazmat.primitives.ciphers import aead
 import jwt
@@ -78,6 +80,25 @@ def generate_key(cipher: str) -> str:
         An encoded cipher key.
     """
     return f"{cipher}:{base64.b64encode(CIPHERS[cipher].generate_key()).decode('ascii')}"
+
+
+def generate_site(ci: CipherInstance) -> tuple[str, bytes, bytes]:
+    """Generate new site ID and its matching encrypted key and nonce.
+
+    Args:
+        ci: the cipher implementation to use to encrypt the site key
+
+    Returns:
+        A site ID, nonce, and encrypted site key.
+    """
+    site_id = str(uuid.uuid4())
+    secret_key = os.urandom(32)  # 256-bits
+    nonce = os.urandom(12)
+    return (
+        site_id,
+        nonce,
+        ci.encrypt(nonce, secret_key, site_id.encode("ascii")),
+    )
 
 
 def b64decode(v: str | bytes) -> str:
