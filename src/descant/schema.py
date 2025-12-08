@@ -1,6 +1,5 @@
 import datetime
 
-from alembic import context
 from sqlalchemy import (
     CHAR,
     Column,
@@ -12,9 +11,8 @@ from sqlalchemy import (
     Table,
     Text,
 )
-from sqlalchemy import engine, pool
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.sql.expression import Insert, Select, select
+from sqlalchemy.sql.expression import Insert, Select, Update, select
 
 from . import crypto
 
@@ -153,4 +151,131 @@ def insert_identity(
         site_id=site_id,
         ttl=ttl,
         max_ttl=max_ttl,
+    )
+
+
+def confirm_identity(
+    identity_id: str,
+    confirmed: datetime.datetime,
+) -> Update:
+    """Generate an UPDATE statement to confirm an identity.
+
+    Args:
+        identity_id: The ID of the identity to confirm.
+        confirmed: The time the identity was confirmed.
+
+    Returns:
+        The UPDATE statement.
+    """
+    return (
+        identities.update()
+        .where(identities.c.identity_id == identity_id)
+        .values(
+            confirmed=confirmed,
+        )
+    )
+
+
+def extend_identity_ttl(
+    identity_id: str,
+    new_ttl: datetime.datetime,
+) -> Update:
+    """Generate an UPDATE statement to extend an identity's TTL.
+
+    Args:
+        identity_id: The ID of the identity to extend.
+        new_ttl: The new TTL for the identity.
+
+    Returns:
+        The UPDATE statement.
+    """
+    return (
+        identities.update()
+        .where(identities.c.identity_id == identity_id)
+        .values(
+            ttl=new_ttl,
+        )
+    )
+
+
+def insert_comment(
+    identity_id: str,
+    thread: str,
+    submitted: datetime.datetime,
+    name: str,
+    site: str,
+    email: str,
+    comment: str,
+) -> Insert:
+    """Generate an INSERT statement to add a comment.
+
+    Args:
+        identity_id: The identity posting the comment.
+        thread: The thread the comment is being posted to.
+        submitted: The time the comment was submitted.
+        name: The name provided with the comment.
+        site: The site provided with the comment.
+        email: The email provided with the comment.
+        comment: The comment text.
+
+    Returns:
+        The INSERT statement.
+    """
+    return comments.insert().values(
+        identity_id=identity_id,
+        thread=thread,
+        submitted=submitted,
+        name=name,
+        site=site,
+        email=email,
+        comment=comment,
+    )
+
+
+def publish_comment(
+    comment_id: int,
+    published: datetime.datetime,
+) -> Update:
+    """Generate an UPDATE statement to publish a comment.
+
+    Args:
+        comment_id: The ID of the comment to publish.
+        published: The time the comment was published.
+
+    Returns:
+        The UPDATE statement.
+    """
+    return (
+        comments.update()
+        .where(comments.c.comment_id == comment_id)
+        .values(
+            published=published,
+        )
+    )
+
+
+def query_comments_by_thread(thread: str) -> Select:
+    """Generate a query to fetch published comments for a given thread.
+
+    Args:
+        thread: The thread to fetch comments for.
+
+    Returns:
+        A SELECT statement to fetch the comments.
+    """
+    return (
+        select(
+            comments.c.comment_id,
+            comments.c.identity_id,
+            comments.c.thread,
+            comments.c.submitted,
+            comments.c.published,
+            comments.c.name,
+            comments.c.site,
+            comments.c.email,
+            comments.c.comment,
+        )
+        .join(identities, comments.c.identity_id == identities.c.identity_id)
+        .where((comments.c.thread == thread) & (comments.c.published.isnot(None) & identities.c.confirmed.isnot(None)))
+        .order_by(comments.c.published.asc())
     )
