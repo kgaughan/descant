@@ -16,7 +16,7 @@ abstract: |
 # Rationale
 
 I would like to enable comments on my sites, but I'd like to do this in as
-GDRP-compliant a fashion as possible. That means storing _no_ PII (Personally
+GDPR-compliant a fashion as possible. That means storing _no_ PII (Personally
 Identifiable Information) and minimal cookie usage by using browser local
 storage for pre-filled fields.
 
