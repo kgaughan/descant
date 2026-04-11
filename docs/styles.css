@@ -98,6 +98,10 @@ main {
 main a {
   color: var(--theme-highlight);
 }
+main li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
 
 pre {
   overflow-x: auto;
