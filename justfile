@@ -27,10 +27,25 @@ clean:
 tools:
 	@uv tool install ruff
 
-# run the mkdocs server
-serve-docs:
-	@# --livereload is needed because of https://github.com/squidfunk/mkdocs-material/issues/8478
-	@uv run --frozen mkdocs serve --livereload
+# serve the documentation locally
+[group('documentation')]
+serve-docs: docs
+	python3 -m http.server -d site
+
+# build the documentation site
+[group('documentation')]
+docs:
+	rm -rf site
+	cd docs && pandoc index.md \
+		--standalone \
+		--from markdown+link_attributes \
+		--to chunkedhtml \
+		--variable toc \
+		--toc-depth 2 \
+		--chunk-template "%i.html" \
+		--template template.html \
+		--highlight-style solarizeddark.theme \
+		--output "../site"
 
 # regenerate the sri hashes
 sri:
