@@ -7,7 +7,7 @@ abstract: |
   1. A melody or counterpoint sung or played above the theme.
   2. A discussion on a theme.
   
-  Discant is a comment management system intended to be relatively
+  Descant is a comment management system intended to be relatively
   spam-resistant while also being 100% compatible with the GDPR. It stores no
   information beyond that which is published publicly, and only requests
   anything resembling PII to allow the user to be validated.
@@ -46,9 +46,9 @@ It must avoid storing _any_ PII. Things like names and website URLs that the
 user wishes to make public are stored, but email addresses are _not_ unless
 the user opts into email notifications for new comments.
 
-## Schema and basic theory of operation of server
+## Schema and basic theory of operation of the server
 
-The are three tables: _sites_, _identities_, and _comments_.
+There are three tables: _sites_, _identities_, and _comments_.
 
 ### Sites
 
@@ -80,7 +80,7 @@ CREATE TABLE identities (
     max_ttl             TIMESTAMP NOT NULL,
     confirmed           TIMESTAMP NULL,
 
-    PRIMARY KEY (indentity_id),
+    PRIMARY KEY (identity_id),
     FOREIGN KEY (site_id) REFERENCES sites (site_id)
 );
 
@@ -89,7 +89,7 @@ CREATE INDEX ix_site ON identities (site_id);
 
 An identity is a temporary authorisation to post on a given site. The first
 time a commenter attempts to post a comment, a new identity is created, and
-random conformation secret is sent to an email they are required to provide.
+random confirmation secret is sent to an email they are required to provide.
 This is tied to a site by _site\_id_, and the _ttl_ (the time before the
 identity TTL should be extended) and the _max\_ttl_ (the time before the
 identity expires completely) are set.
@@ -103,7 +103,7 @@ commenting, no reconfirmation should be needed.
 The email that's sent out contains a link to a form containing the identity ID
 and confirmation secret. Once the identity is confirmed, _ttl_ and _max\_ttl_
 are updated based off of the current time, and _confirmed_ is set to the
-current time. Comments assocated with this identity can now be processed.
+current time. Comments associated with this identity can now be processed.
 
 ### Comments
 
@@ -150,14 +150,14 @@ the commenter can edit the comment. Once the cooldown period expires, the
 comment is considered public and cannot be edited.
 
 If the commenter has opted into email notifications, their encrypted email
-address is stored in _email_. This encrypted using the master key. If this
+address is stored in _email_. This is encrypted using the master key. If this
 field is null, the commenter has not opted into receiving emails.
 
-### Design principals
+### Design principles
 
 Generally, UUIDs are used for public IDs to avoid creating guessable
 identifiers. The comment ID is the one exception for this as it must always be
-used with the _thread_ identfier, and this is always signed in transit.
+used with the _thread_ identifier, and this is always signed in transit.
 
 Rather than using booleans as flags, we use nullable timestamps. If set, this
 is the equivalent of _true_, and lets us know when the event happened.
@@ -292,7 +292,7 @@ db = postgresql+asyncpg://descant:<redacted>@localhost:5432/descant
 ```
 
 Replacing the password you used for `<redacted>` in the example above, you
-should now now be able to use the `create-db` subcommand to populate the
+should now be able to use the `create-db` subcommand to populate the
 database with an appropriate schema.
 
 # To do
@@ -324,7 +324,7 @@ database with an appropriate schema.
   needs to be a queue to allow the site owner to trigger the sending of the
   identity confirmations.
 
-* Where should rendering happen: the client (with moustache.js or something
+* Where should rendering happen: the client (with mustache.js or something
   like it), or the server? For user-editable templates, Mustache on both the
   client and server would likely be safest. For server-side rendering,
   [Chevron](https://github.com/noahmorrison/chevron) looks like the best bet
