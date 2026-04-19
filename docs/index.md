@@ -305,8 +305,8 @@ database with an appropriate schema.
   thing with access to the master key, and thus putting it in its own process
   would mean that if the external internet-facing service is compromised,
   there's less chance that any actual data will be exposed. However, this
-  is no panacea as the the web side of things would still be capable of
-  sending data to the encryption service to get back decrypted data.
+  is no panacea as the web side of things would still be capable of sending
+  data to the encryption service to get back decrypted data.
 * The comment submission endpoint doesn't yet handle comment submission, only
   the generation of the identity. There's nothing that subsequently queues
   up whatever actions are needed for contacting the user, nor anything that
